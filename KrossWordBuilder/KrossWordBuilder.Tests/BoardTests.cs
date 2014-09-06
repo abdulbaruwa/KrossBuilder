@@ -48,9 +48,19 @@ namespace KrossWordBuilder.Tests
             var board = new Board(12);
             board.AddWord("first");
             board.AddWord("restore");
-
             var cellsWithVals = board.GetLoadedCells();
-            Assert.AreEqual(12, cellsWithVals.Count());
+            Assert.AreEqual(11, cellsWithVals.Count());
+        }
+
+        public void ShouldReturnAllSetCellsWithStartCellsIdentified()
+        {
+            var board = new Board(12);
+            board.AddWord("first");
+            board.AddWord("restore");
+            var cellsWithVals = board.GetLoadedCells();
+            Assert.AreEqual(11, cellsWithVals.Count());
+            Assert.AreEqual(2, cellsWithVals.Count(x => x.IsStartPosition));
+ 
         }
 
         [TestMethod, Ignore]
@@ -63,7 +73,6 @@ namespace KrossWordBuilder.Tests
             Assert.IsFalse(wordAdded);
         }
 
-
         [TestMethod]
         public void AddWordVerticalShouldFailIfThereIsCharInPrefixCell()
         {
@@ -74,7 +83,5 @@ namespace KrossWordBuilder.Tests
 
             Assert.IsFalse(wordAdded);
         }
-
-
     }
 }
