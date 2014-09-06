@@ -1,4 +1,5 @@
-﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
+﻿using System.Linq;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace KrossWordBuilder.Tests
 {
@@ -40,24 +41,19 @@ namespace KrossWordBuilder.Tests
             Assert.AreEqual("r", board.Grids[5, 2]);
             Assert.AreEqual("e", board.Grids[6, 2]);
         }
-        
+
         [TestMethod]
-        public void AddAThirdWordHorizonally()
+        public void ShouldReturnAllSetCellsWhenRequested()
         {
             var board = new Board(12);
             board.AddWord("first");
-            //board.AddWord("restore");
+            board.AddWord("restore");
 
-            //Assert.AreEqual("r", board.Grids[0, 2]);
-            //Assert.AreEqual("e", board.Grids[1, 2]);
-            //Assert.AreEqual("s", board.Grids[2, 2]);
-            //Assert.AreEqual("t", board.Grids[3, 2]);
-            //Assert.AreEqual("o", board.Grids[4, 2]);
-            //Assert.AreEqual("r", board.Grids[5, 2]);
-            //Assert.AreEqual("e", board.Grids[6, 2]);
+            var cellsWithVals = board.GetLoadedCells();
+            Assert.AreEqual(12, cellsWithVals.Count());
         }
 
-        [TestMethod]
+        [TestMethod, Ignore]
         public void AddWordVerticalShouldFailIfThereIsCharInSuffixCell()
         {
             var board = new Board(12);

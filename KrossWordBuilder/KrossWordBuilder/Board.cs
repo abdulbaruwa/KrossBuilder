@@ -1,18 +1,11 @@
 ﻿using System;
+using System.Collections;
+using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 
 namespace KrossWordBuilder
 {
-    public class InsertWordResult
-    {
-        public bool IsVertical { get; set; }
-        public Tuple<int, int> StartCell { get; set; }
-        public Tuple<int, int> EndCell { get; set; }
-        public bool Inserted { get; set; }
-        public string[] Word { get; set; }
-    }
-
     public class Board
     {
         public string[,] Grids { get; set; }
@@ -129,6 +122,11 @@ namespace KrossWordBuilder
             var nextrow = insertWordResult.EndCell.Item1;
             var col = insertWordResult.EndCell.Item2;
             return string.IsNullOrEmpty(Grids[nextrow, col]);
+        }
+
+        public IEnumerable<Cell> GetLoadedCells()
+        {
+            throw new NotImplementedException();
         }
     }
 }
