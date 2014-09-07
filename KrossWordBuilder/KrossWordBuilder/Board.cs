@@ -110,14 +110,19 @@ namespace KrossWordBuilder
 
                 if (currentRow == row)
                 {
-                    cell.IsVerticalStartPosition = true;
+                    cell.IsFirstLetter = true;
                 }
-
-
+                
                 //If letter is already on the board for another word, ignore.
                 if (Grids[currentRow, currentCol] != word[i])
                 {
                     Grids[currentRow, currentCol] = word[i];
+                    CellBoard[currentRow, currentCol] = cell;
+                }
+                else
+                {
+                    CellBoard[currentRow, currentCol].IsFirstLetter = true;
+                    CellBoard[currentRow, currentCol].IsJunction = true;
                 }
 
                 currentRow += 1;
@@ -137,7 +142,7 @@ namespace KrossWordBuilder
 
                 if (i == 0)
                 {
-                    cell.IsStartPosition = true;
+                    cell.IsFirstLetter = true;
                 }
                 CellBoard[0, i] = cell;
                 Grids[0, i] = wordArray[i].ToString();
@@ -152,7 +157,7 @@ namespace KrossWordBuilder
             return string.IsNullOrEmpty(Grids[nextrow, col]);
         }
 
-        public IEnumerable<Cell> GetLoadedCells()
+        public IEnumerable<Cell> GetLoadedCells2()
         {
             var result = new List<Cell>();
             for (int i = 0; i < Grids.GetLength(0); i++)
@@ -167,6 +172,22 @@ namespace KrossWordBuilder
                             Col = j,
                             Row = i
                         });
+                    }
+                }
+            }
+            return result;
+        } 
+        
+        public IEnumerable<Cell> GetLoadedCells()
+        {
+            var result = new List<Cell>();
+            for (int i = 0; i < Grids.GetLength(0); i++)
+            {
+                for (int j = 0; j < Grids.GetLength(1); j++)
+                {
+                    if (! string.IsNullOrEmpty(Grids[i, j]))
+                    {
+                        result.Add(CellBoard[i,j]);
                     }
                 }
             }

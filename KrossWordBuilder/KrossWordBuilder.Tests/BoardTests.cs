@@ -52,6 +52,7 @@ namespace KrossWordBuilder.Tests
             Assert.AreEqual(11, cellsWithVals.Count());
         }
 
+        [TestMethod]
         public void ShouldReturnAllSetCellsWithStartCellsIdentified()
         {
             var board = new Board(12);
@@ -59,8 +60,7 @@ namespace KrossWordBuilder.Tests
             board.AddWord("restore");
             var cellsWithVals = board.GetLoadedCells();
             Assert.AreEqual(11, cellsWithVals.Count());
-            Assert.AreEqual(2, cellsWithVals.Count(x => x.IsStartPosition));
- 
+            Assert.AreEqual(2, cellsWithVals.Count(x => x.IsFirstLetter));
         }
 
         [TestMethod, Ignore]
