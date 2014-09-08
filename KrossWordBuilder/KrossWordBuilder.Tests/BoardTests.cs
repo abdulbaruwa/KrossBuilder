@@ -80,8 +80,34 @@ namespace KrossWordBuilder.Tests
             board.Grids[7, 2] = "x";
             board.AddWord("first");
             var wordAdded = board.AddWord("restore");
-
             Assert.IsFalse(wordAdded);
+        }
+
+        //Test to determine cells with letters with match the current word to be inserted.
+        //// If we know the direction of the existing word, say vertical, we can only then add new word horizonally
+        [TestMethod]
+        public void UnitTest_ShouldReturnCellsWithMatchesWithCurrentWordToBeInserted()
+        {
+            var board = new Board(12);
+            board.AddWord("first");
+            board.AddWord("restore");
+            
+            Assert.AreEqual(4, board.GetLetterMatchesFor("race").Count());
+        }
+
+        // Given a cell that is vertically occupied
+        // That is Not in the first letter of a word
+        // That is Not a junction letter
+        // Test should assert a new word can only be inserted Horizonally
+
+        [TestMethod]
+        public void UnitTest_ShouldReturnHorizonalIfCellIsVerticallyUsedOnBoard()
+        {
+            var board = new Board(12);
+            board.AddWord("first");
+            board.AddWord("restore");
+
+            Assert.IsTrue(board.IsCellVerticallyOccupied(new Cell(){Character = "r", Col = 2, Row = 6}));
         }
     }
 }

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Globalization;
 using System.Linq;
 
@@ -180,18 +181,31 @@ namespace KrossWordBuilder
         
         public IEnumerable<Cell> GetLoadedCells()
         {
-            var result = new List<Cell>();
+            return BoardCellsWithValues().Where(x => string.IsNullOrEmpty(x.Character) == false);
+        }
+
+        public IEnumerable<Cell> BoardCellsWithValues()
+        {
             for (int i = 0; i < Grids.GetLength(0); i++)
             {
                 for (int j = 0; j < Grids.GetLength(1); j++)
                 {
-                    if (! string.IsNullOrEmpty(Grids[i, j]))
+                    if (CellBoard[i, j] != null)
                     {
-                        result.Add(CellBoard[i,j]);
+                        yield return CellBoard[i, j];
                     }
                 }
-            }
-            return result;
+            } 
+        }
+
+        public IEnumerable<Cell> GetLetterMatchesFor(string wordToInsert)
+        {
+            return BoardCellsWithValues().Where(x => wordToInsert.Contains(x.Character));
+        }
+
+        public bool IsCellVerticallyOccupied(Cell cell)
+        {
+            return false;
         }
     }
 }
