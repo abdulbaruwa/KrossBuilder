@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Globalization;
 using System.Linq;
 
@@ -26,7 +25,8 @@ namespace KrossWordBuilder
 
         public bool AddWord(string word)
         {
-            char[] wordArray = word.ToArray();
+            string[] wordArray = word.Select(x => x.ToString(CultureInfo.InvariantCulture)).ToArray();
+
             if (IsEmpty())
             {
                 AddFirstWord(wordArray);
@@ -49,10 +49,9 @@ namespace KrossWordBuilder
             return matchFound;
         }
 
-        private InsertWordResult AttemptToAddWordVertically(char[] wordCharArray, int currentRow, int col)
+        private InsertWordResult AttemptToAddWordVertically(string[] word, int currentRow, int col)
         {
-            int wordLength = wordCharArray.Length;
-            string[] word = wordCharArray.Select(x => x.ToString(CultureInfo.InvariantCulture)).ToArray();
+            int wordLength = word.Length;
 
             //Add only if first cell has been prepopulated with first word; 
             if (string.IsNullOrEmpty(Grids[currentRow, col])) return new InsertWordResult();
@@ -106,14 +105,19 @@ namespace KrossWordBuilder
                 {
                     Character = word[i],
                     Col = currentCol,
-                    Row = currentRow
+                    Row = currentRow,
+                    WordV = word,
+                    IndexV = currentRow
                 };
 
                 if (currentRow == row)
                 {
                     cell.IsFirstLetter = true;
                 }
-                
+                else
+                {
+                    cell.VerticalPreceedingRelative = Tuple.Create(currentRow - 1, currentCol);
+                }
                 //If letter is already on the board for another word, ignore.
                 if (Grids[currentRow, currentCol] != word[i])
                 {
@@ -130,23 +134,30 @@ namespace KrossWordBuilder
             }
         }
 
-        private void AddFirstWord(char[] wordArray)
+        private void AddFirstWord(string[] wordArray)
         {
+            //First word is added horizontally
             for (int i = 0; i < wordArray.Length; i++)
             {
                 var cell = new Cell
                 {
-                    Character = wordArray[i].ToString(),
+                    Character = wordArray[i],
                     Row = 0,
                     Col = i,
+                    WordH = wordArray,
+                    Index = i
                 };
 
                 if (i == 0)
                 {
                     cell.IsFirstLetter = true;
                 }
+                else
+                {
+                    cell.HorizontalPreceedingRelative = Tuple.Create(0, i - 1);
+                }
                 CellBoard[0, i] = cell;
-                Grids[0, i] = wordArray[i].ToString();
+                Grids[0, i] = wordArray[i];
             }
         }
 
@@ -209,9 +220,18 @@ namespace KrossWordBuilder
             //? Cell ==> Junction
             //? Cell ==> A continuous array of chars -x and -y
 
+            return cell.WordV != null;
+        }
 
+        private bool IsCellAtPosEmpty(int row, int col)
+        {
+            return CellBoard[row, col] == null || string.IsNullOrEmpty(CellBoard[row, col].Character);
+        }
 
-            return false;
+        public void AddWordHorizontally(string wordToInsert)
+        {
+            var matchedCellVertically = BoardCellsWithValues().Where(x => wordToInsert.Contains(x.Character) && x.WordV != null);
+
         }
     }
 }

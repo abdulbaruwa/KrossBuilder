@@ -107,7 +107,20 @@ namespace KrossWordBuilder.Tests
             board.AddWord("first");
             board.AddWord("restore");
 
-            Assert.IsTrue(board.IsCellVerticallyOccupied(new Cell(){Character = "r", Col = 2, Row = 6}));
+            Assert.IsTrue(board.IsCellVerticallyOccupied(board.CellBoard[2, 2]));
+        }
+
+        [TestMethod]
+        public void ShouldInsertWordHorizontallyIfMatchExistVertically()
+        {
+            var board = new Board(12);
+            board.AddWord("first");
+            board.AddWord("restore");
+
+            //Act; word to add horizontally
+            board.AddWordHorizontally("brace");
+            Assert.IsNotNull(board.CellBoard[5, 1]);
+            Assert.IsNotNull(board.CellBoard[5, 1].WordH);
         }
     }
 }
