@@ -205,6 +205,12 @@ namespace KrossWordBuilder
 
         public bool IsCellVerticallyOccupied(Cell cell)
         {
+            //? Cell ==> First
+            //? Cell ==> Junction
+            //? Cell ==> A continuous array of chars -x and -y
+
+
+
             return false;
         }
     }
