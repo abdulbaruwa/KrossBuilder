@@ -236,39 +236,92 @@ namespace KrossWordBuilder
 
             foreach (Cell cell in matchedCellVertically)
             {
-                if (CanWordBeAddedFromCellPosVertically(cell, wordArray))
+                var canWordBeAddedFromCellPosVerticallyResult = CanWordBeAddedFromCellPosHorizontally(cell, wordArray);
+                if (canWordBeAddedFromCellPosVerticallyResult.Item1)
                 {
-                    InsertWordHorizontally(cell, wordArray);
+                    InsertWordHorizontally(cell, canWordBeAddedFromCellPosVerticallyResult.Item2, wordArray);
                 }
             }
         }
 
-        private void InsertWordHorizontally(Cell cell, string[] wordArray)
+        /// <summary>
+        ///  Insert Word Horizontally, Called internally after it has been determined a word can be inserted.
+        /// </summary>
+        /// <param name="cell">Cell Position in Grid where match is found</param>
+        /// <param name="matchIndexInword">Index position in word array to be inserted where a match on the grid has been found</param>
+        /// <param name="wordArray">Word array to be inserted</param>
+        private void InsertWordHorizontally(Cell cell1, int matchIndexInword, string[] wordArray)
         {
-            throw new NotImplementedException();
+            var startCol = cell1.Col - matchIndexInword;
+            var currentRow = cell1.Row;
+            int currentCol = startCol;
+            for (int i = currentCol; i < wordArray.Length; i++)
+            {
+                var cell = new Cell
+                {
+                    Character = wordArray[i],
+                    Col = currentCol,
+                    Row = cell1.Row,
+                    WordH = wordArray,
+                    IndexV = currentCol
+                };
+
+                if (currentCol == startCol)
+                {
+                    cell.IsFirstLetter = true;
+                }
+                else
+                {
+                    cell.HorizontalPreceedingRelative = Tuple.Create(cell1.Row, currentCol-1);
+                }
+                //If letter is already on the board for another word, ignore.
+                if (Grids[currentRow, currentCol] != wordArray[i])
+                {
+                    Grids[currentRow, currentCol] = wordArray[i];
+                    CellBoard[currentRow, currentCol] = cell;
+                }
+                else
+                {
+                    CellBoard[currentRow, currentCol].IsFirstLetter = true;
+                    CellBoard[currentRow, currentCol].IsJunction = true;
+                }
+
+                currentRow += 1;
+            }
         }
 
-        private bool CanWordBeAddedFromCellPosVertically(Cell cell, string[] wordArray)
+        private Tuple<bool, int> CanWordBeAddedFromCellPosHorizontally(Cell cell, string[] wordArray)
         {
             bool gridMatchFound = false;
             Cell cell1 = cell;
             int matchIndex = Array.FindIndex(wordArray, x => x == cell1.Character);
+            int lastIndex = -1;
+
+            //for each occurence of the matching letter in the word.
             while (matchIndex > -1 && gridMatchFound == false)
             {
-                bool possible = true;
+                lastIndex = matchIndex;
+                gridMatchFound = true;
+                // for each letter in word
                 for (int i = 0; i < wordArray.Length; i++)
                 {
-                    string horCell = CellBoard[cell.Row, cell.Col - matchIndex].Character;
-                    if (!string.IsNullOrEmpty(horCell) || horCell != wordArray[i])
+                    if (cell.Col - matchIndex < 0)
                     {
-                        possible = false;
+                        gridMatchFound = false;
+                        break;
+                    }
+
+                    var horCell = CellBoard[cell.Row, cell.Col - matchIndex + i];
+                    if (horCell != null && horCell.Character != wordArray[i])
+                    {
+                        gridMatchFound = false;
                         break;
                     }
                 }
-
                 matchIndex = Array.FindIndex(wordArray, matchIndex + 1, x => x == cell1.Character);
             }
-            return possible;
+
+            return  Tuple.Create(gridMatchFound, lastIndex);
         }
     }
 }

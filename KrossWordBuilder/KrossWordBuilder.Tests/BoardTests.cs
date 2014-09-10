@@ -118,7 +118,7 @@ namespace KrossWordBuilder.Tests
             board.AddWord("restore");
 
             //Act; word to add horizontally
-            board.AddWordHorizontally("brace");
+            board.AddHorizontally("brace");
             Assert.IsNotNull(board.CellBoard[5, 1]);
             Assert.IsNotNull(board.CellBoard[5, 1].WordH);
         }
