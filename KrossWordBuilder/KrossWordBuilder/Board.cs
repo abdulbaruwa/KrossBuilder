@@ -101,7 +101,7 @@ namespace KrossWordBuilder
             int currentRow = row;
             for (int i = currentRow; i < wordLength; i++)
             {
-                var cell = new Cell()
+                var cell = new Cell
                 {
                     Character = word[i],
                     Col = currentCol,
@@ -188,8 +188,8 @@ namespace KrossWordBuilder
                 }
             }
             return result;
-        } 
-        
+        }
+
         public IEnumerable<Cell> GetLoadedCells()
         {
             return BoardCellsWithValues().Where(x => string.IsNullOrEmpty(x.Character) == false);
@@ -206,7 +206,7 @@ namespace KrossWordBuilder
                         yield return CellBoard[i, j];
                     }
                 }
-            } 
+            }
         }
 
         public IEnumerable<Cell> GetLetterMatchesFor(string wordToInsert)
@@ -228,10 +228,47 @@ namespace KrossWordBuilder
             return CellBoard[row, col] == null || string.IsNullOrEmpty(CellBoard[row, col].Character);
         }
 
-        public void AddWordHorizontally(string wordToInsert)
+        public void AddHorizontally(string wordToInsert)
         {
-            var matchedCellVertically = BoardCellsWithValues().Where(x => wordToInsert.Contains(x.Character) && x.WordV != null);
+            IEnumerable<Cell> matchedCellVertically =
+                BoardCellsWithValues().Where(x => wordToInsert.Contains(x.Character) && x.WordV != null);
+            string[] wordArray = wordToInsert.Select(x => x.ToString(CultureInfo.InvariantCulture)).ToArray();
 
+            foreach (Cell cell in matchedCellVertically)
+            {
+                if (CanWordBeAddedFromCellPosVertically(cell, wordArray))
+                {
+                    InsertWordHorizontally(cell, wordArray);
+                }
+            }
+        }
+
+        private void InsertWordHorizontally(Cell cell, string[] wordArray)
+        {
+            throw new NotImplementedException();
+        }
+
+        private bool CanWordBeAddedFromCellPosVertically(Cell cell, string[] wordArray)
+        {
+            bool gridMatchFound = false;
+            Cell cell1 = cell;
+            int matchIndex = Array.FindIndex(wordArray, x => x == cell1.Character);
+            while (matchIndex > -1 && gridMatchFound == false)
+            {
+                bool possible = true;
+                for (int i = 0; i < wordArray.Length; i++)
+                {
+                    string horCell = CellBoard[cell.Row, cell.Col - matchIndex].Character;
+                    if (!string.IsNullOrEmpty(horCell) || horCell != wordArray[i])
+                    {
+                        possible = false;
+                        break;
+                    }
+                }
+
+                matchIndex = Array.FindIndex(wordArray, matchIndex + 1, x => x == cell1.Character);
+            }
+            return possible;
         }
     }
 }
