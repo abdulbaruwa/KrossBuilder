@@ -1,4 +1,5 @@
 ﻿using System.Linq;
+using System.Security;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace KrossWordBuilder.Tests
@@ -121,6 +122,26 @@ namespace KrossWordBuilder.Tests
             board.AddHorizontally("brace");
             Assert.IsNotNull(board.CellBoard[5, 1]);
             Assert.IsNotNull(board.CellBoard[5, 1].WordH);
+        }
+
+        [TestMethod]
+        public void AddWordHorizontallyShouldFailIfThereIsCharInPrefixCell()
+        {
+            var board = new Board(12);
+            board.AddWord("first");
+            board.AddWord("restore");
+
+            board.Grids[5, 0] = "x";
+            var cell = new Cell
+            {Character = "x",
+                Col = 0,
+                Row = 5
+            };
+            board.CellBoard[5, 0] = cell;
+            
+            //Act; word to add horizontally
+            board.AddHorizontally("brace");
+            Assert.IsNull(board.CellBoard[5, 1]);
         }
     }
 }

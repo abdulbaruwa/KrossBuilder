@@ -237,11 +237,21 @@ namespace KrossWordBuilder
             foreach (Cell cell in matchedCellVertically)
             {
                 var canWordBeAddedFromCellPosVerticallyResult = CanWordBeAddedFromCellPosHorizontally(cell, wordArray);
-                if (canWordBeAddedFromCellPosVerticallyResult.Item1)
+                if (canWordBeAddedFromCellPosVerticallyResult.Item1 && ValidateAround(cell, canWordBeAddedFromCellPosVerticallyResult.Item2, wordArray, true))
                 {
                     InsertWordHorizontally(cell, canWordBeAddedFromCellPosVerticallyResult.Item2, wordArray);
                 }
             }
+        }
+
+        private bool ValidateAround(Cell cell, int item2, string[] wordArray, bool isVertical)
+        {
+            if (isVertical == false)
+            {
+                var startPos = cell.Index + item2;
+
+            }
+            return false;
         }
 
         /// <summary>
@@ -263,7 +273,7 @@ namespace KrossWordBuilder
                     Col = currentCol,
                     Row = cell1.Row,
                     WordH = wordArray,
-                    IndexV = currentCol
+                    Index = currentCol
                 };
 
                 if (currentCol == startCol)
@@ -286,8 +296,14 @@ namespace KrossWordBuilder
                     CellBoard[currentRow, currentCol].IsJunction = true;
                 }
 
-                currentRow += 1;
+                currentCol += 1;
             }
+        }
+
+        private bool Validate()
+        {
+            
+
         }
 
         private Tuple<bool, int> CanWordBeAddedFromCellPosHorizontally(Cell cell, string[] wordArray)
