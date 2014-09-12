@@ -2,9 +2,17 @@
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
+using System.Runtime.InteropServices;
 
 namespace KrossWordBuilder
 {
+
+    public enum AcrosVertical
+    {
+        Across,
+        Vertical
+    };
+
     public class Board
     {
         public Board(int size)
@@ -145,7 +153,7 @@ namespace KrossWordBuilder
                     Row = 0,
                     Col = i,
                     WordH = wordArray,
-                    Index = i
+                    IndexH = i
                 };
 
                 if (i == 0)
@@ -237,28 +245,73 @@ namespace KrossWordBuilder
             foreach (Cell cell in matchedCellVertically)
             {
                 var canWordBeAddedFromCellPosVerticallyResult = CanWordBeAddedFromCellPosHorizontally(cell, wordArray);
-                if (canWordBeAddedFromCellPosVerticallyResult.Item1 && ValidateAround(cell, canWordBeAddedFromCellPosVerticallyResult.Item2, wordArray, true))
+                if (canWordBeAddedFromCellPosVerticallyResult.Item1 && ValidateAround(cell, canWordBeAddedFromCellPosVerticallyResult.Item2, wordArray, AcrosVertical.Across))
                 {
                     InsertWordHorizontally(cell, canWordBeAddedFromCellPosVerticallyResult.Item2, wordArray);
                 }
             }
         }
 
-        private bool ValidateAround(Cell cell, int item2, string[] wordArray, bool isVertical)
+        /// <summary>
+        /// Validate that Prefix, Suffix cells of word do not contain a letter 
+        /// And that cells above and below (for horizontal word) or right and left (for vertical word) are also empty.
+        /// </summary>
+        /// <param name="cell"></param>
+        /// <param name="indexInWordArray"></param>
+        /// <param name="wordArray"></param>
+        /// <param name="isVertical"></param>
+        /// <returns></returns>
+        private bool ValidateAround(Cell cell, int indexInWordArray, string[] wordArray, AcrosVertical isVertical)
         {
-            if (isVertical == false)
+            if (isVertical == AcrosVertical.Vertical)
             {
-                var startPos = cell.Index + item2;
-
+                return ValidateAroundForVertical(cell, indexInWordArray, wordArray);
             }
-            return false;
+            return ValdateAroundForHorizontal(cell, indexInWordArray, wordArray);
+
+        }
+
+        private bool ValidateAroundForVertical(Cell cell, int indexInWordArray, string[] wordArray)
+        {
+            var startPosVert = cell.IndexH + indexInWordArray;
+            var endPosHor = startPosVert + wordArray.Length;
+            
+            //check cells above and below each word cell
+            for (var i = 0; i < wordArray.Length; i++)
+            {
+                if (CellBoard[startPosVert + i, cell.Col + 1] != null && CellBoard[startPosVert + i, cell.Col - 1] != null)
+                {
+                    return false;
+                }
+            }
+
+            //Check prefix and suffix cells
+            return CellBoard[startPosVert + 1, cell.Col] == null && CellBoard[endPosHor + 1, cell.Col] == null;
+        }
+
+        private bool ValdateAroundForHorizontal(Cell cell, int indexInWordArray, string[] wordArray)
+        {
+            var startPosHori = cell.IndexH + indexInWordArray;
+            var endPos = startPosHori + wordArray.Length;
+
+            //check cells above and below each word cell, but ignore checking the around the match position
+            for (var i = 0; i < wordArray.Length; i++)
+            {
+                if (i == indexInWordArray) continue;
+                if (CellBoard[cell.Row + 1, startPosHori + i] != null && CellBoard[cell.Row - 1, startPosHori + i] != null)
+                {
+                    return false;
+                }
+            }
+            //Check prefix and suffix cells
+            return CellBoard[cell.Row, startPosHori + 1] == null && CellBoard[cell.Row, endPos + 1] == null;
         }
 
         /// <summary>
         ///  Insert Word Horizontally, Called internally after it has been determined a word can be inserted.
         /// </summary>
         /// <param name="cell">Cell Position in Grid where match is found</param>
-        /// <param name="matchIndexInword">Index position in word array to be inserted where a match on the grid has been found</param>
+        /// <param name="matchIndexInword">IndexH position in word array to be inserted where a match on the grid has been found</param>
         /// <param name="wordArray">Word array to be inserted</param>
         private void InsertWordHorizontally(Cell cell1, int matchIndexInword, string[] wordArray)
         {
@@ -273,7 +326,7 @@ namespace KrossWordBuilder
                     Col = currentCol,
                     Row = cell1.Row,
                     WordH = wordArray,
-                    Index = currentCol
+                    IndexH = currentCol
                 };
 
                 if (currentCol == startCol)
@@ -298,12 +351,6 @@ namespace KrossWordBuilder
 
                 currentCol += 1;
             }
-        }
-
-        private bool Validate()
-        {
-            
-
         }
 
         private Tuple<bool, int> CanWordBeAddedFromCellPosHorizontally(Cell cell, string[] wordArray)

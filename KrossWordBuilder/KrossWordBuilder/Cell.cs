@@ -12,7 +12,7 @@ namespace KrossWordBuilder
         public Tuple<int, int> HorizontalPreceedingRelative { get; set; }
         public Tuple<int, int> VerticalPreceedingRelative { get; set; }
         public string[] WordH { get; set; }
-        public int Index { get; set; }
+        public int IndexH { get; set; }
         public int IndexV { get; set; }
         public string[] WordV { get; set; }
     }
