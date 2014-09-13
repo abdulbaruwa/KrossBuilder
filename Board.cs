@@ -76,6 +76,15 @@ namespace KrossWordBuilder
             return vertAttempt.Item1 ? vertAttempt.Item1 : horAttempt.Item1;
         }
 
+        public void ProcessWords(string[] words)
+        {
+            var failed = new List<string>();
+            foreach (var word in words)
+            {
+                if( ! AddWord2(word)) failed.Add(word);
+            }
+        }
+
         private InsertWordResult AttemptToAddWordVertically(string[] word, int currentRow, int col)
         {
             int wordLength = word.Length;
