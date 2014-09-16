@@ -260,6 +260,11 @@ namespace KrossWordBuilder.Tests
             PrintBoard(board);
         }
 
+        private void ShouldInsertFromGivenSetOfWords()
+        {
+            
+        }
+
         private void PrintBoard(Board board)
         {
             for (int i = 0; i < board.CellBoard.GetLength(0); i++)
