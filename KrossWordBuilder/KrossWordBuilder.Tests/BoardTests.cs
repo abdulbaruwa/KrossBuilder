@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
@@ -260,9 +261,14 @@ namespace KrossWordBuilder.Tests
             PrintBoard(board);
         }
 
+        [TestMethod]
         private void ShouldInsertFromGivenSetOfWords()
         {
-            
+            var packagePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "puzzledataEnglishWordsList1.txt");
+            var wordsAndHints = File.ReadLines(packagePath);
+            var wordDic = wordsAndHints.Select(fileDataInLine => fileDataInLine.Split(new[] { '|' }))
+                                 .ToDictionary(lineArray => lineArray[0], lineArray => lineArray[1]);
+ 
         }
 
         private void PrintBoard(Board board)
