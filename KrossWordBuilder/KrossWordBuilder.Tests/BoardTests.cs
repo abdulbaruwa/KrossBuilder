@@ -262,13 +262,18 @@ namespace KrossWordBuilder.Tests
         }
 
         [TestMethod]
-        private void ShouldInsertFromGivenSetOfWords()
+        public void ShouldInsertFromGivenSetOfWords()
         {
-            var packagePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "puzzledataEnglishWordsList1.txt");
+            var packagePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Words.txt");
             var wordsAndHints = File.ReadLines(packagePath);
             var wordDic = wordsAndHints.Select(fileDataInLine => fileDataInLine.Split(new[] { '|' }))
                                  .ToDictionary(lineArray => lineArray[0], lineArray => lineArray[1]);
- 
+
+
+            var board = new Board(12);
+            var wordlist = wordDic.Select(x => x.Key).Take(20).ToArray();
+            var failed = board.ProcessWords(wordlist);
+            PrintBoard(board);
         }
 
         private void PrintBoard(Board board)
