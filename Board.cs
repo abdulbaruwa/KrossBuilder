@@ -5,6 +5,14 @@ using System.Linq;
 
 namespace KrossWordBuilder
 {
+    public static class IntergerExtensions
+    {
+        public static bool IntegerWithin(this int val, int lower, int upper)
+        {
+            if (val >= lower && val <= upper) return true;
+            return false;
+        }
+    }
 
     public enum AcrosVertical
     {
@@ -76,13 +84,17 @@ namespace KrossWordBuilder
             return vertAttempt.Item1 ? vertAttempt.Item1 : horAttempt.Item1;
         }
 
-        public void ProcessWords(string[] words)
+        public List<string> ProcessWords(string[] words)
         {
             var failed = new List<string>();
             foreach (var word in words)
             {
+                Console.WriteLine("Inserting word '{0}' ", word);
                 if( ! AddWord2(word)) failed.Add(word);
+                PrintBoard(this);
             }
+
+            return failed;
         }
 
         private InsertWordResult AttemptToAddWordVertically(string[] word, int currentRow, int col)
@@ -351,6 +363,10 @@ namespace KrossWordBuilder
             var endPos = startPosHori + wordArray.Length - 1;
 
             //check cells above and below each word cell, but ignore checking the around the match position
+            if (cell.Row + 1 > RowSize - 1) return false;
+            if (cell.Row - 1 < 0) return false;
+            if (endPos > RowSize - 1) return false;
+
             for (var i = 0; i < wordArray.Length; i++)
             {
                 if (i == indexInWordArray) continue;
@@ -359,15 +375,17 @@ namespace KrossWordBuilder
                     return false;
                 }
             }
+
             bool prefixOk = false;
             bool suffixOk = false;
             if (startPosHori == 0) prefixOk = true;
             if (endPos == 0) suffixOk = true;
-            if (startPosHori > 0 && CellBoard[startPosHori - 1, cell.Col] == null)
+
+            if (startPosHori > 0 && CellBoard[cell.Row, startPosHori - 1] == null)
             {
                 prefixOk = true;
             }
-            if (endPos > 0 && CellBoard[endPos + 1, cell.Col] == null)
+            if ((endPos == RowSize - 1) || endPos > 0 &&  CellBoard[cell.Row, endPos + 1] == null)
             {
                 suffixOk = true;
             }
@@ -518,8 +536,9 @@ namespace KrossWordBuilder
                         break;
                     }
 
-                    var verCell = CellBoard[cell.Row - matchIndex + i, cell.Col];
-                    if (verCell != null && verCell.Character != wordArray[i])
+                    var rowPos = cell.Row - matchIndex + i;
+
+                    if ( (!rowPos.IntegerWithin(0, 11)) || (CellBoard[rowPos, cell.Col] != null && CellBoard[rowPos, cell.Col].Character != wordArray[i]))
                     {
                         gridMatchFound = false;
                         break;
@@ -529,6 +548,26 @@ namespace KrossWordBuilder
             }
 
             return Tuple.Create(gridMatchFound, lastIndex);
+        }
+
+        private void PrintBoard(Board board)
+        {
+            for (int i = 0; i < board.CellBoard.GetLength(0); i++)
+            {
+                string row = "";
+                for (int j = 0; j < board.CellBoard.GetLength(1); j++)
+                {
+                    if (board.CellBoard[i, j] == null)
+                    {
+                        row = row + " " + "-";
+                    }
+                    else
+                    {
+                        row = row + " " + board.CellBoard[i, j].Character;
+                    }
+                }
+                Console.WriteLine(row);
+            }
         }
     }
 }
