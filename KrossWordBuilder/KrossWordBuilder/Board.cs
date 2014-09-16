@@ -1,11 +1,18 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
-using System.Runtime.InteropServices;
 
 namespace KrossWordBuilder
 {
+    public static class IntergerExtensions
+    {
+        public static bool IntegerWithin(this int val, int lower, int upper)
+        {
+            if (val >= lower && val <= upper) return true;
+            return false;
+        }
+    }
 
     public enum AcrosVertical
     {
@@ -55,6 +62,39 @@ namespace KrossWordBuilder
             } while (row + wordArray.Length <= RowSize && matchFound == false);
 
             return matchFound;
+        }
+
+        public bool AddWord2(string word)
+        {
+            string[] wordArray = word.Select(x => x.ToString(CultureInfo.InvariantCulture)).ToArray();
+
+            if (IsEmpty())
+            {
+                AddFirstWord(wordArray);
+                return true;
+            }
+
+            var vertAttempt = AddVertically(word);
+            var horAttempt = new Tuple<bool, int>(false,-1);
+            if (vertAttempt.Item1 == false)
+            {
+                horAttempt = AddHorizontally(word);
+            }
+
+            return vertAttempt.Item1 ? vertAttempt.Item1 : horAttempt.Item1;
+        }
+
+        public List<string> ProcessWords(string[] words)
+        {
+            var failed = new List<string>();
+            foreach (var word in words)
+            {
+                Console.WriteLine("Inserting word '{0}' ", word);
+                if( ! AddWord2(word)) failed.Add(word);
+                PrintBoard(this);
+            }
+
+            return failed;
         }
 
         private InsertWordResult AttemptToAddWordVertically(string[] word, int currentRow, int col)
@@ -231,12 +271,7 @@ namespace KrossWordBuilder
             return cell.WordV != null;
         }
 
-        private bool IsCellAtPosEmpty(int row, int col)
-        {
-            return CellBoard[row, col] == null || string.IsNullOrEmpty(CellBoard[row, col].Character);
-        }
-
-        public void AddHorizontally(string wordToInsert)
+        public Tuple<bool, int> AddHorizontally(string wordToInsert)
         {
             IEnumerable<Cell> matchedCellVertically =
                 BoardCellsWithValues().Where(x => wordToInsert.Contains(x.Character) && x.WordV != null);
@@ -248,8 +283,28 @@ namespace KrossWordBuilder
                 if (canWordBeAddedFromCellPosVerticallyResult.Item1 && ValidateAround(cell, canWordBeAddedFromCellPosVerticallyResult.Item2, wordArray, AcrosVertical.Across))
                 {
                     InsertWordHorizontally(cell, canWordBeAddedFromCellPosVerticallyResult.Item2, wordArray);
+                    return canWordBeAddedFromCellPosVerticallyResult;
                 }
             }
+            return Tuple.Create(false, -1);
+        }
+
+        public Tuple<bool, int> AddVertically(string wordToInsert)
+        {
+            IEnumerable<Cell> matchedHorizontally =
+                BoardCellsWithValues().Where(x => wordToInsert.Contains(x.Character) && x.WordH != null);
+            string[] wordArray = wordToInsert.Select(x => x.ToString(CultureInfo.InvariantCulture)).ToArray();
+
+            foreach (Cell cell in matchedHorizontally)
+            {
+                var canWordBeAddedFromCellPosVerticallyResult = CanWordBeAddedFromCellPosVertically(cell, wordArray);
+                if (canWordBeAddedFromCellPosVerticallyResult.Item1 && ValidateAround(cell, canWordBeAddedFromCellPosVerticallyResult.Item2, wordArray, AcrosVertical.Vertical))
+                {
+                    InsertWordVertically(cell, canWordBeAddedFromCellPosVerticallyResult.Item2, wordArray);
+                    return canWordBeAddedFromCellPosVerticallyResult;
+                }
+            }
+            return Tuple.Create(false, -1);
         }
 
         /// <summary>
@@ -273,38 +328,70 @@ namespace KrossWordBuilder
 
         private bool ValidateAroundForVertical(Cell cell, int indexInWordArray, string[] wordArray)
         {
-            var startPosVert = cell.IndexH + indexInWordArray;
-            var endPosHor = startPosVert + wordArray.Length;
+            var startPosVert = cell.Row - indexInWordArray;
+            var endPosHor = startPosVert + wordArray.Length -1;
             
             //check cells above and below each word cell
             for (var i = 0; i < wordArray.Length; i++)
             {
-                if (CellBoard[startPosVert + i, cell.Col + 1] != null && CellBoard[startPosVert + i, cell.Col - 1] != null)
+                if (i == indexInWordArray) continue;
+                if (CellBoard[startPosVert + i, cell.Col + 1] != null || CellBoard[startPosVert + i, cell.Col - 1] != null)
                 {
                     return false;
                 }
             }
 
             //Check prefix and suffix cells
-            return CellBoard[startPosVert + 1, cell.Col] == null && CellBoard[endPosHor + 1, cell.Col] == null;
+            bool prefixOk = false;
+            bool suffixOk = false;
+            if (startPosVert == 0) prefixOk = true;
+            if (endPosHor == 0) suffixOk = true;
+            if (startPosVert > 0 && CellBoard[startPosVert - 1, cell.Col] == null)
+            {
+                prefixOk = true;
+            }
+            if (endPosHor > 0 && CellBoard[endPosHor + 1, cell.Col] == null)
+            {
+                suffixOk = true;
+            }
+            return prefixOk && suffixOk; // CellBoard[startPosVert - 1, cell.Col] == null && CellBoard[endPosHor + 1, cell.Col] == null;
         }
 
         private bool ValdateAroundForHorizontal(Cell cell, int indexInWordArray, string[] wordArray)
         {
-            var startPosHori = cell.IndexH + indexInWordArray;
-            var endPos = startPosHori + wordArray.Length;
+            var startPosHori = cell.Col - indexInWordArray;
+            var endPos = startPosHori + wordArray.Length - 1;
 
             //check cells above and below each word cell, but ignore checking the around the match position
+            if (cell.Row + 1 > RowSize - 1) return false;
+            if (cell.Row - 1 < 0) return false;
+            if (endPos > RowSize - 1) return false;
+
             for (var i = 0; i < wordArray.Length; i++)
             {
                 if (i == indexInWordArray) continue;
-                if (CellBoard[cell.Row + 1, startPosHori + i] != null && CellBoard[cell.Row - 1, startPosHori + i] != null)
+                if (CellBoard[cell.Row + 1, startPosHori + i] != null || CellBoard[cell.Row - 1, startPosHori + i] != null)
                 {
                     return false;
                 }
             }
+
+            bool prefixOk = false;
+            bool suffixOk = false;
+            if (startPosHori == 0) prefixOk = true;
+            if (endPos == 0) suffixOk = true;
+
+            if (startPosHori > 0 && CellBoard[cell.Row, startPosHori - 1] == null)
+            {
+                prefixOk = true;
+            }
+            if ((endPos == RowSize - 1) || endPos > 0 &&  CellBoard[cell.Row, endPos + 1] == null)
+            {
+                suffixOk = true;
+            }
+
             //Check prefix and suffix cells
-            return CellBoard[cell.Row, startPosHori + 1] == null && CellBoard[cell.Row, endPos + 1] == null;
+            return prefixOk && suffixOk; // CellBoard[cell.Row, startPosHori - 1] == null && CellBoard[cell.Row, endPos + 1] == null;
         }
 
         /// <summary>
@@ -318,7 +405,7 @@ namespace KrossWordBuilder
             var startCol = cell1.Col - matchIndexInword;
             var currentRow = cell1.Row;
             int currentCol = startCol;
-            for (int i = currentCol; i < wordArray.Length; i++)
+            for (int i = 0; i < wordArray.Length; i++)
             {
                 var cell = new Cell
                 {
@@ -350,6 +437,47 @@ namespace KrossWordBuilder
                 }
 
                 currentCol += 1;
+            }
+        }
+
+        private void InsertWordVertically(Cell cell1, int matchIndexInword, string[] wordArray)
+        {
+            var startRow = cell1.Row - matchIndexInword;
+            var startCol = cell1.Col;
+            var currentRow = startRow;
+            int currentCol = startCol;
+            for (int i = 0; i < wordArray.Length; i++)
+            {
+                var cell = new Cell
+                {
+                    Character = wordArray[i],
+                    Col = cell1.Col,
+                    Row = currentRow,
+                    WordV = wordArray,
+                    IndexV = currentRow
+                };
+
+                if (currentCol == startRow)
+                {
+                    cell.IsFirstLetter = true;
+                }
+                else
+                {
+                    cell.HorizontalPreceedingRelative = Tuple.Create(cell1.Row -1, currentCol);
+                }
+                //If letter is already on the board for another word, ignore.
+                if (Grids[currentRow, currentCol] != wordArray[i])
+                {
+                    Grids[currentRow, currentCol] = wordArray[i];
+                    CellBoard[currentRow, currentCol] = cell;
+                }
+                else
+                {
+                    CellBoard[currentRow, currentCol].IsFirstLetter = true;
+                    CellBoard[currentRow, currentCol].IsJunction = true;
+                }
+
+                currentRow += 1;
             }
         }
 
@@ -385,6 +513,61 @@ namespace KrossWordBuilder
             }
 
             return  Tuple.Create(gridMatchFound, lastIndex);
+        }
+
+        private Tuple<bool, int> CanWordBeAddedFromCellPosVertically(Cell cell, string[] wordArray)
+        {
+            bool gridMatchFound = false;
+            Cell cell1 = cell;
+            int matchIndex = Array.FindIndex(wordArray, x => x == cell1.Character);
+            int lastIndex = -1;
+
+            //for each occurence of the matching letter in the word.
+            while (matchIndex > -1 && gridMatchFound == false)
+            {
+                lastIndex = matchIndex;
+                gridMatchFound = true;
+                // for each letter in word
+                for (int i = 0; i < wordArray.Length; i++)
+                {
+                    if (cell.Col - matchIndex < 0)
+                    {
+                        gridMatchFound = false;
+                        break;
+                    }
+
+                    var rowPos = cell.Row - matchIndex + i;
+
+                    if ( (!rowPos.IntegerWithin(0, 11)) || (CellBoard[rowPos, cell.Col] != null && CellBoard[rowPos, cell.Col].Character != wordArray[i]))
+                    {
+                        gridMatchFound = false;
+                        break;
+                    }
+                }
+                matchIndex = Array.FindIndex(wordArray, matchIndex + 1, x => x == cell1.Character);
+            }
+
+            return Tuple.Create(gridMatchFound, lastIndex);
+        }
+
+        private void PrintBoard(Board board)
+        {
+            for (int i = 0; i < board.CellBoard.GetLength(0); i++)
+            {
+                string row = "";
+                for (int j = 0; j < board.CellBoard.GetLength(1); j++)
+                {
+                    if (board.CellBoard[i, j] == null)
+                    {
+                        row = row + " " + "-";
+                    }
+                    else
+                    {
+                        row = row + " " + board.CellBoard[i, j].Character;
+                    }
+                }
+                Console.WriteLine(row);
+            }
         }
     }
 }
