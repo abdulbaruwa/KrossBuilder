@@ -67,7 +67,7 @@ namespace KrossWordBuilder
         public bool AddWord2(string word)
         {
             string[] wordArray = word.Select(x => x.ToString(CultureInfo.InvariantCulture)).ToArray();
-
+            if (wordArray.Length > RowSize) return false;
             if (IsEmpty())
             {
                 AddFirstWord(wordArray);
@@ -89,8 +89,8 @@ namespace KrossWordBuilder
             var failed = new List<string>();
             foreach (var word in words)
             {
-                Console.WriteLine("Inserting word '{0}' ", word);
-                if( ! AddWord2(word)) failed.Add(word);
+                Console.WriteLine("Inserting word '{0}', length = {1} ", word, word.Length);
+                if (! AddWord2(word)){failed.Add(word);}
                 PrintBoard(this);
             }
 
@@ -330,7 +330,9 @@ namespace KrossWordBuilder
         {
             var startPosVert = cell.Row - indexInWordArray;
             var endPosHor = startPosVert + wordArray.Length -1;
-            
+
+            if (endPosHor > RowSize - 1) return false;
+
             //check cells above and below each word cell
             for (var i = 0; i < wordArray.Length; i++)
             {
@@ -350,7 +352,8 @@ namespace KrossWordBuilder
             {
                 prefixOk = true;
             }
-            if (endPosHor > 0 && CellBoard[endPosHor + 1, cell.Col] == null)
+
+            if ((endPosHor == RowSize-1) || endPosHor > 0 && CellBoard[endPosHor + 1, cell.Col] == null)
             {
                 suffixOk = true;
             }
@@ -363,7 +366,6 @@ namespace KrossWordBuilder
             var endPos = startPosHori + wordArray.Length - 1;
 
             //check cells above and below each word cell, but ignore checking the around the match position
-            if (cell.Row + 1 > RowSize - 1) return false;
             if (cell.Row - 1 < 0) return false;
             if (endPos > RowSize - 1) return false;
 
@@ -502,8 +504,9 @@ namespace KrossWordBuilder
                         break;
                     }
 
-                    var horCell = CellBoard[cell.Row, cell.Col - matchIndex + i];
-                    if (horCell != null && horCell.Character != wordArray[i])
+                    var colPos = cell.Col - matchIndex + i;
+
+                    if ((!colPos.IntegerWithin(0, 11)) || CellBoard[cell.Row, colPos] != null && CellBoard[cell.Row, colPos].Character != wordArray[i])
                     {
                         gridMatchFound = false;
                         break;

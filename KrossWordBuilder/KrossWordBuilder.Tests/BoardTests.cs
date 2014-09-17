@@ -259,6 +259,74 @@ namespace KrossWordBuilder.Tests
 
             List<string> result = board.ProcessWords(wordlist.ToArray());
             PrintBoard(board);
+        }        
+        
+        [TestMethod]
+        public void ShouldNotAddWordVerticallyIfMatchPositionOverunsGrid()
+        {
+            var board = new Board(12);
+            var wordlist = new List<string>();
+            wordlist.Add("kettledrum");
+            wordlist.Add("embezzler");
+            wordlist.Add("gladioli");
+
+            // Board after first 3 words are added
+            //k e t t l e d r u m - -
+            // - m - - - - - - - - - -
+            // - b - - - - - - - - - -
+            // - e - - - - - - - - - -
+            // - z - - - - - - - - - -
+            // - z - - - - - - - - - -
+            // g l a d i o l i - - - -   <- Attempt to add 'platted' here on 'L', will overun the grid
+            // - e - - - - - - - - - -
+            // - r - - - - - - - - - -
+            // - - - - - - - - - - - -
+            // - - - - - - - - - - - -
+            // - - - - - - - - - - - -
+            
+            wordlist.Add("platted");
+
+            List<string> result = board.ProcessWords(wordlist.ToArray());
+            PrintBoard(board);
+        }
+
+        [TestMethod]
+        public void ShouldAddWordHorizontallyOnTheLastRow()
+        {
+            var board = new Board(12);
+            var wordlist = new List<string>();
+            wordlist.Add("embezzler");
+            wordlist.Add("zodiaclights");    
+            wordlist.Add("szub");
+
+            List<string> result = board.ProcessWords(wordlist.ToArray());
+            PrintBoard(board);
+        }
+
+        [TestMethod]
+        public void ShouldAddWordVerticallyThatIsTwelveCharsLong()
+        {
+            var board = new Board(12);
+            var wordlist = new List<string>();
+            wordlist.Add("embezzler");
+            wordlist.Add("zodiaclights");
+
+            // Board after first 3 words are added
+            //k e t t l e d r u m - -
+            // - m - - - - - - - - - -
+            // - b - - - - - - - - - -
+            // - e - - - - - - - - - -
+            // - z - - - - - - - - - -
+            // - z - - - - - - - - - -
+            // g l a d i o l i - - - -   <- Attempt to add 'platted' here on 'L', will overun the grid
+            // - e - - - - - - - - - -
+            // - r - - - - - - - - - -
+            // - - - - - - - - - - - -
+            // - - - - - - - - - - - -
+            // - - - - - - - - - - - -
+            
+            List<string> result = board.ProcessWords(wordlist.ToArray());
+            PrintBoard(board);
         }
 
         [TestMethod]
@@ -267,8 +335,7 @@ namespace KrossWordBuilder.Tests
             var packagePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Words.txt");
             var wordsAndHints = File.ReadLines(packagePath);
             var wordDic = wordsAndHints.Select(fileDataInLine => fileDataInLine.Split(new[] { '|' }))
-                                 .ToDictionary(lineArray => lineArray[0], lineArray => lineArray[1]);
-
+                                 .ToDictionary(lineArray =>  (lineArray[0]).TrimEnd().ToLower(), lineArray => lineArray[1]);
 
             var board = new Board(12);
             var wordlist = wordDic.Select(x => x.Key).Take(20).ToArray();
