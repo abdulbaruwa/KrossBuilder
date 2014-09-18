@@ -86,14 +86,27 @@ namespace KrossWordBuilder
 
         public List<string> ProcessWords(string[] words)
         {
+            var lastcount = 0;
+            List<string> failed = ProcessWordsLoop(words); ;
+            while (true)
+            {
+                if (failed.Count == lastcount) return failed;
+                failed = ProcessWordsLoop(failed.ToArray());
+                lastcount = failed.Count;
+            }
+        }
+
+        private List<string> ProcessWordsLoop(string[] words)
+        {
             var failed = new List<string>();
             foreach (var word in words)
             {
                 Console.WriteLine("Inserting word '{0}', length = {1} ", word, word.Length);
-                if (! AddWord2(word)){failed.Add(word);}
-                PrintBoard(this);
+                if (! AddWord2(word))
+                {
+                    failed.Add(word);
+                }
             }
-
             return failed;
         }
 
@@ -337,9 +350,26 @@ namespace KrossWordBuilder
             for (var i = 0; i < wordArray.Length; i++)
             {
                 if (i == indexInWordArray) continue;
-                if (CellBoard[startPosVert + i, cell.Col + 1] != null || CellBoard[startPosVert + i, cell.Col - 1] != null)
+                if (cell.Col == RowSize - 1)
                 {
-                    return false;
+                    if (CellBoard[startPosVert + i, cell.Col - 1] != null)
+                    {
+                        return false;
+                    }
+                }
+                else if (cell.Col == 0)
+                {
+                   if(CellBoard[startPosVert + i, cell.Col + 1] != null)
+                    {
+                        return false;
+                    }
+                }
+                else
+                {
+                    if (CellBoard[startPosVert + i, cell.Col + 1] != null || CellBoard[startPosVert + i, cell.Col - 1] != null)
+                    {
+                        return false;
+                    }
                 }
             }
 
@@ -374,7 +404,7 @@ namespace KrossWordBuilder
                 if (i == indexInWordArray) continue;
 
                 // Ignore check below cell if on last row
-                if (cell.Row == RowSize)
+                if (cell.Row == RowSize - 1)
                 {
                     if (CellBoard[cell.Row - 1, startPosHori + i] != null)
                     {
