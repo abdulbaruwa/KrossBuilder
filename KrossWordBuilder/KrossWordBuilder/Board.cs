@@ -372,9 +372,30 @@ namespace KrossWordBuilder
             for (var i = 0; i < wordArray.Length; i++)
             {
                 if (i == indexInWordArray) continue;
-                if (CellBoard[cell.Row + 1, startPosHori + i] != null || CellBoard[cell.Row - 1, startPosHori + i] != null)
+
+                // Ignore check below cell if on last row
+                if (cell.Row == RowSize)
                 {
-                    return false;
+                    if (CellBoard[cell.Row - 1, startPosHori + i] != null)
+                    {
+                        return false;
+                    } 
+                }
+                else if (cell.Row == 0) //Ignore check above cell if on first row
+                {
+                    if (CellBoard[cell.Row + 1, startPosHori + i] != null)
+                    {
+                        return false;
+                    }
+                }
+                else
+                {
+                    if (CellBoard[cell.Row + 1, startPosHori + i] != null ||
+                        CellBoard[cell.Row - 1, startPosHori + i] != null)
+                    {
+                        return false;
+                    }
+                    
                 }
             }
 

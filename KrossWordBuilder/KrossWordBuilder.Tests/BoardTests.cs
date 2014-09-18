@@ -339,6 +339,7 @@ namespace KrossWordBuilder.Tests
 
             var board = new Board(12);
             var wordlist = wordDic.Select(x => x.Key).Take(20).ToArray();
+
             var failed = board.ProcessWords(wordlist);
             PrintBoard(board);
         }
