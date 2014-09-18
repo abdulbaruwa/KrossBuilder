@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Runtime;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace KrossWordBuilder.Tests
@@ -298,6 +299,62 @@ namespace KrossWordBuilder.Tests
             wordlist.Add("embezzler");
             wordlist.Add("zodiaclights");    
             wordlist.Add("szub");
+            wordlist.Add("grrrrrrk");
+            wordlist.Add("pook");
+
+            List<string> result = board.ProcessWords(wordlist.ToArray());
+            PrintBoard(board);
+        }
+
+        [TestMethod]
+        public void ShouldAddWordVerticallyOnTheLastCol()
+        {
+            var board = new Board(12);
+            var wordlist = new List<string>();
+            wordlist.Add("embezzler");
+            wordlist.Add("zodiaclights");    
+            wordlist.Add("szub");
+
+            List<string> result = board.ProcessWords(wordlist.ToArray());
+            PrintBoard(board);
+        }
+
+
+        [TestMethod]
+        public void ShouldProcessWordsAddWordHorizontallyOnTheLastRowTest()
+        {
+            var board = new Board(12);
+            var wordlist = new List<string>();
+            wordlist.Add("kettledrum");
+            wordlist.Add("cabaret");
+            wordlist.Add("shopping");
+            wordlist.Add("embezzler");
+            wordlist.Add("automatic");
+            wordlist.Add("gladioli");
+            wordlist.Add("competition");
+            wordlist.Add("sargent");
+            wordlist.Add("sieve");
+            wordlist.Add("compass");
+            wordlist.Add("playwright");
+            wordlist.Add("trombone");
+            wordlist.Add("bus");
+            wordlist.Add("bre");
+            wordlist.Add("encyclopaedia");
+            wordlist.Add("ewes");
+            wordlist.Add("rand");
+            wordlist.Add("plotted");
+            wordlist.Add("can");
+            wordlist.Add("perennials");
+            wordlist.Add("catapult");
+            wordlist.Add("retort");
+            wordlist.Add("dubbin");
+            wordlist.Add("separating");
+            wordlist.Add("accelerator");
+            wordlist.Add("aisle");
+            wordlist.Add("castanets");
+            wordlist.Add("rescuing");
+            wordlist.Add("retrieve");
+            wordlist.Add("aphid"); ;
 
             List<string> result = board.ProcessWords(wordlist.ToArray());
             PrintBoard(board);
@@ -338,10 +395,12 @@ namespace KrossWordBuilder.Tests
                                  .ToDictionary(lineArray =>  (lineArray[0]).TrimEnd().ToLower(), lineArray => lineArray[1]);
 
             var board = new Board(12);
-            var wordlist = wordDic.Select(x => x.Key).Take(20).ToArray();
+            var wordlist = wordDic.Select(x => x.Key).Take(30).ToArray();
 
             var failed = board.ProcessWords(wordlist);
             PrintBoard(board);
+            Console.WriteLine("Failed to insert {0} from the list of {1} words", failed.Count, wordlist.Length);
+            Assert.AreNotEqual(failed.Count, wordlist.Length);
         }
 
         private void PrintBoard(Board board)
