@@ -1,4 +1,4 @@
-﻿Kettledrum	|	A percussion instrument consisting of a large copper or brass drum covered with a parchment skin.
+Kettledrum	|	A percussion instrument consisting of a large copper or brass drum covered with a parchment skin.
 Cabaret	|	A show consisting of singing, dancing, and comic acts, in a restaurant or club.
 Shopping	|	The activity of visiting shops and stores to look at and buy things.
 Embezzler	|	Somebody who takes for personal use money or property that has been given in trust by others, without their knowledge or permission.
@@ -10,10 +10,13 @@ Sieve	|	A utensil consisting of a round frame surrounding a mesh.
 Compass	|	A device for finding directions, usually with a magnetized pointer.
 Playwright	|	Somebody who writes plays.
 Trombone	|	A brass wind instrument of varying size with valves and a U-shaped slide.
+Bus			| Vehichle
+Bre         | Something
 Encyclopaedia	|	A reference work offering comprehensive information on all or specialized areas of knowledge.
 Ewes	|	Female sheep.
 Rand	|	The standard unit of currency in the Republic of South Africa.
 Plotted	|	Marked something on a chart.
+Can			| can
 Perennials	|	Plants that last for more than two growing seasons.
 Catapult	|	A Y-shaped device of wood, plastic, or metal, fitted with elastic, used for firing stones or pellets.
 Retort	|	To say something sharp. angry. witty, or insulting in quick response to something somebody else has said.
