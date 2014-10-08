@@ -27,12 +27,14 @@ namespace KrossWordBuilder
             Grids = new string[size, size];
             CellBoard = new Cell[size, size];
             RowSize = size;
+            InsertWordResults = new List<InsertWordResult>();
         }
 
         public string[,] Grids { get; set; }
         public Cell[,] CellBoard { get; set; }
         public int RowSize { get; set; }
 
+        public List<InsertWordResult> InsertWordResults { get; set; }
         private bool IsEmpty()
         {
             return Grids.Length > 0 & string.IsNullOrEmpty(Grids[0, 0]);
@@ -71,6 +73,14 @@ namespace KrossWordBuilder
             if (IsEmpty())
             {
                 AddFirstWord(wordArray);
+                InsertWordResults.Add(new InsertWordResult()
+                {
+                    Inserted = true,
+                    IsVertical = false,
+                    StartCell = Tuple.Create(0, 0),
+                    EndCell = Tuple.Create(0, word.Length-1)
+                });
+
                 return true;
             }
 
@@ -120,6 +130,7 @@ namespace KrossWordBuilder
             if (wordInsertedResult.Inserted)
             {
                 AddWordVerticallyToRow(wordLength, currentRow, col, word);
+                //InsertWordResults.Add(wordInsertedResult);
             }
             return wordInsertedResult;
         }
@@ -295,7 +306,16 @@ namespace KrossWordBuilder
                 var canWordBeAddedFromCellPosVerticallyResult = CanWordBeAddedFromCellPosHorizontally(cell, wordArray);
                 if (canWordBeAddedFromCellPosVerticallyResult.Item1 && ValidateAround(cell, canWordBeAddedFromCellPosVerticallyResult.Item2, wordArray, AcrosVertical.Across))
                 {
+                    var startCol = canWordBeAddedFromCellPosVerticallyResult.Item2 - wordToInsert.Length;
                     InsertWordHorizontally(cell, canWordBeAddedFromCellPosVerticallyResult.Item2, wordArray);
+                    InsertWordResults.Add(new InsertWordResult()
+                    {
+                        Inserted = true,
+                        IsVertical = false,
+                        StartCell = Tuple.Create(cell.Row, cell.Col-startCol),
+                        EndCell = Tuple.Create(cell.Row, cell.Col + wordToInsert.Length)
+
+                    });
                     return canWordBeAddedFromCellPosVerticallyResult;
                 }
             }
@@ -314,6 +334,15 @@ namespace KrossWordBuilder
                 if (canWordBeAddedFromCellPosVerticallyResult.Item1 && ValidateAround(cell, canWordBeAddedFromCellPosVerticallyResult.Item2, wordArray, AcrosVertical.Vertical))
                 {
                     InsertWordVertically(cell, canWordBeAddedFromCellPosVerticallyResult.Item2, wordArray);
+                    int startrow = canWordBeAddedFromCellPosVerticallyResult.Item2;
+                    InsertWordResults.Add(new InsertWordResult()
+                    {
+                        Inserted=true,
+                        IsVertical = true,
+                        StartCell = Tuple.Create(cell.Row - startrow, cell.Col),
+                        EndCell = Tuple.Create(cell.Row + wordToInsert.Length, cell.Col)
+
+                    });
                     return canWordBeAddedFromCellPosVerticallyResult;
                 }
             }
